@@ -3,13 +3,17 @@ from edas import hitung_edas
 
 app = Flask(__name__, static_folder="dist", static_url_path="")
 
-@app.route("/")
-def serve():
-	return send_from_directory(app.static_folder, "index.html")
-
+@app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
-def static_proxy(path):
-	return send_from_directory(app.static_folder, path)
+def serve_vue(path):
+    import os
+
+    full_path = os.path.join(app.static_folder, path)
+
+    if path != "" and os.path.exists(full_path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
 
 @app.route("/api/edas", methods=["POST"])
 def edas_api():
@@ -39,4 +43,4 @@ def edas_api():
 		}), 500
 	
 if __name__ == "__main__":
-	app.run(debug=True)
+	app.run(host="0.0.0.0",debug=True)
